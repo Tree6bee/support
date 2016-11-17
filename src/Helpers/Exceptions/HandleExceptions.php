@@ -22,16 +22,16 @@ use Closure;
 class HandleExceptions
 {
     /**
-     * @var $debug
+     * @var $testing
      */
-    protected $debug;
+    protected $testing;
 
     protected $callback;
 
-    public function __construct($debug, Closure $callback)
+    public function __construct($testing, Closure $callback)
     {
         //初始化
-        $this->debug = $debug;
+        $this->testing = $testing;
         $this->callback = $callback;
         //接管
         $this->handle();
@@ -41,13 +41,6 @@ class HandleExceptions
     {
         error_reporting(-1);
 
-        if ($this->debug) {
-            ini_set('display_errors', 'On');
-        } else {
-            //--@todo 待验证 不建议配置nginx的500,400等多种错误页，否则没法接管--
-            ini_set('display_errors', 'Off');
-        }
-
         //错误捕获
         set_error_handler(array($this, 'handleError')); //接收所有的错误类型
 
@@ -56,6 +49,11 @@ class HandleExceptions
 
         //程序结束 第一个参数为回调，后续都是作为回调函数的参数
         register_shutdown_function(array($this, 'handleShutdown'), 0);
+
+        //设置为On的时候,如果出现致命错误(fatal error)会在错误页面外多输出一次,所以基本都是Off
+        if (! $this->testing) {
+            ini_set('display_errors', 'Off');
+        }
     }
 
     /**

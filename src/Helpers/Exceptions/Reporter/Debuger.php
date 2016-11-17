@@ -7,10 +7,19 @@ namespace Tree6bee\Support\Helpers\Exceptions\Reporter;
  */
 class Debuger
 {
+    protected $collapseDir;
+
     protected $cfVersion;
 
-    public function __construct($cfVersion = 'CtxFramework/1.0')
+    /**
+     * @param string $collapseDir 错误显示页面中需要折叠的代码目录
+     * @param string $cfVersion 错误显示页面的框架标识
+     */
+    public function __construct($collapseDir = '', $cfVersion = 'CtxFramework/1.0')
     {
+        $vendorDir = __DIR__ . '/../../../../../../';   //vendor 目录
+        $collapseDir = empty($collapseDir) ? $vendorDir : $collapseDir;
+        $this->collapseDir = realpath($collapseDir);
         $this->cfVersion = $cfVersion;
     }
 
@@ -130,7 +139,7 @@ class Debuger
     public function isCoreCode($trace)
     {
         if (isset($trace['file'])) {
-            return $trace['file']==='unknown' || strpos(realpath($trace['file']), CTX_BASE . DIRECTORY_SEPARATOR)===0;
+            return $trace['file']==='unknown' || strpos(realpath($trace['file']), $this->collapseDir . DIRECTORY_SEPARATOR)===0;
         }
         return false;
     }

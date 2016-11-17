@@ -6,10 +6,17 @@ use Tree6bee\Support\Helpers\Exceptions\Reporter\Debuger;
 
 class Handler
 {
+    protected $collapseDir;
+
     protected $cfVersion;
 
-    public function __construct($cfVersion = 'CtxFramework/1.0')
+    /**
+     * @param string $collapseDir 错误显示页面中需要折叠的代码目录
+     * @param string $cfVersion 错误显示页面的框架标识
+     */
+    public function __construct($collapseDir = '', $cfVersion = 'CtxFramework/1.0')
     {
+        $this->collapseDir = $collapseDir;
         $this->cfVersion = $cfVersion;
     }
 
@@ -47,7 +54,7 @@ class Handler
             if ($this->wantsJson()) {
                 //@todo
             } else {
-                return (new Debuger($this->cfVersion))->displayException($e);
+                return (new Debuger($this->collapseDir, $this->cfVersion))->displayException($e);
             }
         }
     }

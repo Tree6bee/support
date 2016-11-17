@@ -8,7 +8,7 @@ class RepositoryTest extends \PHPUnit_Framework_TestCase
 {
     private $config;
 
-    private $file = __DIR__ . '/data/config';
+    private $file = __DIR__ . '/config/main';
 
     public function __construct($name = null, array $data = [], $dataName = '')
     {

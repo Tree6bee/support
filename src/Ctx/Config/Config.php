@@ -1,9 +1,8 @@
 <?php
 
-namespace Ctx\Service\Ctx;
+namespace Tree6bee\Support\Ctx\Config;
 
 use Tree6bee\Support\Ctx\Config\Repository as ConfigRepository;
-use Tree6bee\Ctx\Loader;
 use Exception;
 
 /**
@@ -18,7 +17,7 @@ use Exception;
 class Config
 {
     /**
-     * code_base 目录
+     * config 目录
      */
     private $configDir;
 
@@ -83,10 +82,10 @@ class Config
             }
         }
         $file = $options['file'] . '.php';
-        if (! file_exists($file)) {
-            throw new Exception($file . ' :config file do not exist.');
-        }
-        $config = Loader\includeFile($file);
+        // if (! file_exists($file)) {  //采用了require
+        //     throw new Exception($file . ' :config file do not exist.');
+        // }
+        $config = require $file;
         $this->repository->set($options['file'], $config);
 
         return $this->getConfigWithOptions($options, $default);

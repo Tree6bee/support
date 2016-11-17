@@ -5,6 +5,9 @@ namespace Tree6bee\Support\Helpers\XML;
 use SimpleXmlElement;
 use JsonSerializable;
 
+/**
+ * XML to Json conversion, XML to Array conversion
+ */
 class JsonableXMLElement extends SimpleXmlElement implements JsonSerializable
 {
     /**

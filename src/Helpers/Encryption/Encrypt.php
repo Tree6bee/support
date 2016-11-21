@@ -73,6 +73,8 @@ class Encrypt extends EncryptBase
      *
      * @param string $str 需要加密的字符串 如果不是字符串可以采用 json_encode 或则 serialize 包装
      * @param string $key 秘钥 (通过 mcrypt_module_get_supported_key_sizes($cipher) 可以获取支持的长度)
+     *
+     * @return string
      */
     public function encode($str, $key = null)
     {
@@ -86,10 +88,14 @@ class Encrypt extends EncryptBase
     }
 
     /**
+     *
      * 解密算法
      * 解密:base64解码->解密->unpadding
      *
      * @param string $str 需要解密的字符串
+     * @param string $key 秘钥
+     *
+     * @return string
      */
     public function decode($str, $key = null)
     {

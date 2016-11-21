@@ -54,6 +54,6 @@ abstract class Encrypt
         return $str;
     }
 
-    abstract public function encode($str, $key);  //加密
-    abstract public function decode($str, $key);  //解密
+    abstract public function encode($str, $key = null);  //加密
+    abstract public function decode($str, $key = null);  //解密
 }

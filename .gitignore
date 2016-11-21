@@ -1,5 +1,6 @@
 security/*
 .bak/*
-vendor/*
 .DS_Store
 .idea/*
+vendor/*
+composer.lock

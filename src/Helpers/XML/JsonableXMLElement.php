@@ -2,13 +2,16 @@
 
 namespace Tree6bee\Support\Helpers\XML;
 
-use SimpleXmlElement;
+use SimpleXMLElement;
 use JsonSerializable;
 
 /**
  * XML to Json conversion, XML to Array conversion
+ *
+ * 版本依赖:
+ *      - JsonSerializable 5.4.0
  */
-class JsonableXMLElement extends SimpleXmlElement implements JsonSerializable
+class JsonableXMLElement extends SimpleXMLElement implements JsonSerializable
 {
     /**
      * SimpleXMLElement JSON serialization

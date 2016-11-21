@@ -41,10 +41,10 @@ class Handler
         $ex = $this->getLogOfException($e);
         $this->report($ex, 'exception');
 
-        $this->render($e, $ex);
+        $this->render($e);
     }
 
-    protected function render($e, $ex = '')
+    protected function render($e)
     {
         if (php_sapi_name() == 'cli') { //命令行模式
             echo "\nerror trace:\n" .
@@ -77,6 +77,7 @@ class Handler
      */
     protected function wantsJson()
     {
+        //isset($_SERVER['HTTP_X_REQUESTED_WITH']) && 'XMLHttpRequest' == $_SERVER['HTTP_X_REQUESTED_WITH']
         return false;
     }
 

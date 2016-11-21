@@ -84,7 +84,7 @@ class HandleExceptions
         // }
 
         if (! is_null($error = error_get_last()) && self::isFatal($error['type'])) {
-            return $this->handleException(
+            $this->handleException(
                 new ErrorException($error['message'], $error['type'], 0, $error['file'], $error['line'])
             );
         }

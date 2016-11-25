@@ -38,7 +38,7 @@ class Handler
         restore_error_handler();
         restore_exception_handler();
 
-        $this->report($ex, 'exception');
+        $this->report($e);
 
         $this->render($e);
     }
@@ -46,25 +46,42 @@ class Handler
     protected function render($e)
     {
         if (php_sapi_name() == 'cli') { //命令行模式
-            echo "\nerror trace:\n" .
-                print_r(array_slice($e->getTrace(), 0, 6), true) . "\n";
-            return true;
+            $this->renderForConsole($e);
         } else {    //web运行方式
-            if ($this->wantsJson()) {
-                //@todo
-            } else {
-                return (new Debuger($this->collapseDir, $this->cfVersion))->displayException($e);
-            }
+            $this->renderHttpException($e);
+        }
+    }
+
+    protected function renderHttpException($e)
+    {
+        if ($this->wantsJson()) {
+            $this->renderHttpExceptionWithJson($e);
+        } else {
+            $this->showPage($e);
         }
     }
 
     /**
-     * 获取记录日志用的异常字符串
+     * 命令行模式
      */
-    protected function getLogOfException($e)
+    protected function renderForConsole($e)
     {
-        return '(' . get_class($e) . ':' . $e->getCode() . ') ' .
-            $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine();
+        echo "\nerror trace:\n" . print_r(array_slice($e->getTrace(), 0, 6), true) . "\n";
+    }
+
+    /**
+     * http json 模式
+     */
+    protected function renderHttpExceptionWithJson($e)
+    {
+    }
+
+    /**
+     * http web 模式
+     */
+    protected function showPage($e)
+    {
+        (new Debuger($this->collapseDir, $this->cfVersion))->displayException($e);
     }
 
     /**
@@ -81,14 +98,18 @@ class Handler
     }
 
     /**
-     * 错误日志记录
+     * @todo 完善异常日志，参考laravel
+     * 获取记录日志用的异常字符串
      */
-    protected function report($ex, $cutDate = true)
+    protected function getLogOfException($e)
     {
         //附加时间
         $content = '[' . date('Y-m-d H:i:s') . ' ' . date_default_timezone_get() . '] ';
-        //错误信息
-        $content .= $ex;
+
+        //获取异常信息
+        $content .= '(' . get_class($e) . ':' . $e->getCode() . ') ' .
+                    $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine();
+
         //附加uri
         $request_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : 'Unkown';
         $content .= ' [' . $request_uri . ']' .PHP_EOL;
@@ -101,8 +122,15 @@ class Handler
         // var_export($_COOKIE, true);
         // var_export($_REQUEST, true);
 
-        Tree6bee\Cf\Support\Facades\Log::error($content);
-        //@todo 
-        // return Log::write($content, 'exception', $cutDate);
+        return $content;
+    }
+
+    /**
+     * 错误日志记录
+     */
+    protected function report($e)
+    {
+        // $content = $this->getLogOfException($e);
+        // \Tree6bee\Cf\Support\Facades\Log::error($content);
     }
 }

@@ -38,7 +38,6 @@ class Handler
         restore_error_handler();
         restore_exception_handler();
 
-        $ex = $this->getLogOfException($e);
         $this->report($ex, 'exception');
 
         $this->render($e);
@@ -84,7 +83,7 @@ class Handler
     /**
      * 错误日志记录
      */
-    protected function report($ex, $fileName = 'error', $cutDate = true)
+    protected function report($ex, $cutDate = true)
     {
         //附加时间
         $content = '[' . date('Y-m-d H:i:s') . ' ' . date_default_timezone_get() . '] ';
@@ -102,7 +101,8 @@ class Handler
         // var_export($_COOKIE, true);
         // var_export($_REQUEST, true);
 
+        Tree6bee\Cf\Support\Facades\Log::error($content);
         //@todo 
-        // return Log::write($content, $fileName, $cutDate);
+        // return Log::write($content, 'exception', $cutDate);
     }
 }

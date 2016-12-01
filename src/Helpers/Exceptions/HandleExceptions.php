@@ -28,7 +28,7 @@ class HandleExceptions
 
     protected $callback;
 
-    public function __construct($testing, Closure $callback)
+    public function __construct(Closure $callback, $testing = false)
     {
         //初始化
         $this->testing = $testing;

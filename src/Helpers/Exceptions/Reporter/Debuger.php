@@ -20,7 +20,7 @@ class Debuger
         $vendorDir = __DIR__ . '/../../../../../../';   //vendor 目录
         $collapseDir = empty($collapseDir) ? $vendorDir : $collapseDir;
         $this->collapseDir = realpath($collapseDir);
-        $this->cfVersion = ' ' . PHP_VERSION . ' ' . $cfVersion;
+        $this->cfVersion = ' php/' . PHP_VERSION . ' ' . $cfVersion;
     }
 
     /**

@@ -20,7 +20,7 @@ class Debuger
         $vendorDir = __DIR__ . '/../../../../../../';   //vendor 目录
         $collapseDir = empty($collapseDir) ? $vendorDir : $collapseDir;
         $this->collapseDir = realpath($collapseDir);
-        $this->cfVersion = $cfVersion;
+        $this->cfVersion = ' ' . PHP_VERSION . ' ' . $cfVersion;
     }
 
     /**
@@ -64,7 +64,7 @@ class Debuger
             'trace'=>$exception->getTraceAsString(),
             'traces'=>$trace,
             'time'=>time(),
-            'version'=> (! empty($_SERVER['SERVER_SOFTWARE']) ? $_SERVER['SERVER_SOFTWARE'] : '') . ' ' . $this->cfVersion,
+            'version'=> (! empty($_SERVER['SERVER_SOFTWARE']) ? $_SERVER['SERVER_SOFTWARE'] : '') . $this->cfVersion,
         );
 
         if (!headers_sent()) {

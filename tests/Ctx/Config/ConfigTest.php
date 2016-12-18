@@ -6,6 +6,11 @@ use Tree6bee\Support\Ctx\Config\Config;
 
 class ConfigTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @var Config
+     */
+    private $config;
+
     public function __construct($name = null, array $data = [], $dataName = '')
     {
         parent::__construct($name, $data, $dataName);

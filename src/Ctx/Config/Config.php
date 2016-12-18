@@ -31,7 +31,7 @@ class Config
      */
     public function __construct($configDir)
     {
-        $this->configDir = $configDir;
+        $this->configDir = realpath($configDir);
         $this->repository = new ConfigRepository;
     }
 
@@ -39,34 +39,18 @@ class Config
      * 获取配置
      * $this->getConfig('upload.ip@common/main');
      */
-    public function getConfig($item, $default = null, $level = 'app')
+    public function getConfig($item, $default = null)
     {
-        $options = $this->parseItem($item, $level);
+        $options = $this->parseItem($item);
         return $this->getConfigWithOptions($options, $default);
     }
 
-    private function parseItem($item, $level = 'app')
+    private function parseItem($item)
     {
-        $basedir = $this->getConfigBaseDir($level);
-        if (empty($basedir)) {
-            throw new Exception('config base directory do not exist.');
-        }
-        $basedir = realpath($basedir);
         $itemArr = explode('@', $item);
-        $file = $basedir . '/' . $itemArr[1];
+        $file = $this->configDir . '/' . $itemArr[1];
         $option = $itemArr[0];
         return compact('file', 'option');
-    }
-
-    /**
-     * 获取配置文件的基础目录
-     */
-    private function getConfigBaseDir($level = 'app')
-    {
-        if ('app' == $level) {
-            return $this->configDir;
-        }
-        return $this->getConfig('security_path@Ctx/main');
     }
 
     /**
@@ -99,9 +83,9 @@ class Config
      * 设置安全配置
      * $this->ctx->Ctx->config->setConfig($item, $config, 'security');
      */
-    public function setConfig($item, $config, $level = 'app')
+    public function setConfig($item, $config)
     {
-        $options = $this->parseItem($item, $level);
+        $options = $this->parseItem($item);
         if (empty($options['option'])) {
             $this->repository->set($options['file'], $config);
         } else {

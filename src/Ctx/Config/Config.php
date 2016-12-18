@@ -27,7 +27,9 @@ class Config
     private $repository;
 
     /**
-     * 构造函数
+     * Config constructor.
+     *
+     * @param $configDir string 配置文件夹
      */
     public function __construct($configDir)
     {

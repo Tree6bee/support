@@ -37,6 +37,13 @@ class Config
 
     /**
      * 获取配置
+     *
+     * @param $item string 配置选项,如 'upload.ip@common/main'
+     * @param mixed $default 默认值
+     *
+     * @return mixed
+     *
+     * @example
      * $this->getConfig('upload.ip@common/main');
      */
     public function getConfig($item, $default = null)
@@ -55,6 +62,11 @@ class Config
 
     /**
      * 根据文件名和配置option获取具体配置
+     *
+     * @param $options
+     * @param null $default
+     *
+     * @return mixed
      */
     private function getConfigWithOptions($options, $default = null)
     {
@@ -78,10 +90,9 @@ class Config
     /**
      * 动态修改配置
      *
-     * @example
-     * $this->ctx->Ctx->config->setConfig($item, $config, 'app');
-     * 设置安全配置
-     * $this->ctx->Ctx->config->setConfig($item, $config, 'security');
+     * @param $item string 如 'upload.ip@Ctx/main',
+     * @param $config mixed 配置值
+     * @return void
      */
     public function setConfig($item, $config)
     {

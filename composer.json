@@ -12,6 +12,9 @@
     },
 
     "autoload": {
+        "files": [
+            "src/Ctx/Loader/file.php"
+        ],
         "psr-4": {
             "Tree6bee\\Support\\": "src/"
         }

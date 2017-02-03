@@ -13,16 +13,12 @@ use Throwable;
  */
 class View
 {
-    private function __construct()
-    {
-    }
-
     public static function show($__view = null, array $__data = array())
     {
-        return (new self)->make($__view, $__data);
+        return (new static)->make($__view, $__data);
     }
 
-    private function make($__view = null, array $__data = array())
+    protected function make($__view = null, array $__data = array())
     {
         $obLevel = ob_get_level();
         ob_start();
@@ -38,7 +34,7 @@ class View
         return ltrim(ob_get_clean());
     }
 
-    private function handleViewException(Exception $e, $obLevel)
+    protected function handleViewException(Exception $e, $obLevel)
     {
         while (ob_get_level() > $obLevel) {
             ob_end_clean();

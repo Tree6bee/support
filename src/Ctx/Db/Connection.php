@@ -22,14 +22,6 @@ class Connection
     protected $pdo;
 
     /**
-     * The number of active transactions.
-     * 如果大于 0 则不用多次调用开启事务
-     *
-     * @var int
-     */
-    protected $transactions = 0;
-
-    /**
      * 超时时间
      */
     protected $timeout = 3;

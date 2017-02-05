@@ -4,6 +4,8 @@ namespace Tree6bee\Support\Ctx\Db;
 
 use PDO;
 use Exception;
+use Throwable;
+use Closure;
 
 /**
  * 框架MySql数据库辅助类
@@ -237,17 +239,11 @@ class Connection
             // up in the database. Then we'll re-throw the exception so it can
             // be handled how the developer sees fit for their applications.
             catch (Exception $e) {
-                if ($this->causedByDeadlock($e) && $this->transactions > 1) {
-                    --$this->transactions;
-
-                    throw $e;
-                }
-
-                $this->rollBack();
+                $this->pdo->rollBack();
 
                 throw $e;
             } catch (Throwable $e) {
-                $this->rollBack();
+                $this->pdo->rollBack();
 
                 throw $e;
             }

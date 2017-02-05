@@ -56,4 +56,26 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
             echo $e->getMessage();
         }
     }
+
+    /**
+     * 测试pgsql jsonb字段的写入
+     */
+    public function testJsonb()
+    {
+        $id = rand(100, 1000);
+        return ;    //屏蔽测试
+
+        $this->db->transaction(function($db) use ($id) { 
+            //写入
+            var_dump($this->db->insert('users', array(
+                array(
+                    'id'    => $id,
+                    'name'  => '张三',
+                    'data'  => json_encode(array('a', 'b', 'c')),
+                ),
+            )));
+            print_r( $this->db->select('select * from users where id = ?', array($id)) );
+            throw new \Exception('transaction test');
+        });
+    }
 }

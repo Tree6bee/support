@@ -18,7 +18,7 @@ class View
         return (new static)->make($__view, $__data);
     }
 
-    protected function make($__view = null, array $__data = array())
+    public function make($__view = null, array $__data = array())
     {
         $obLevel = ob_get_level();
         ob_start();

@@ -5,6 +5,7 @@ namespace Tree6bee\Support\Ctx\Cache;
 /**
  * redis client
  * 兼容redis协议的客户端，不依赖第三方库
+ * redis协议参考: https://redis.io/topics/protocol
  *
  * @author sh7ning
  * @since 2017-02-16

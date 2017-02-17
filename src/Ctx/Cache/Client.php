@@ -85,6 +85,27 @@ class Client
         return $withResponse ? $this->readResponse() : $this->getResource();
     }
 
+    /**
+     * 如果需要长连接的话，析构函数不能调用关闭连接
+     */
+    public function disconnect()
+    {
+        if (is_resource($this->resource)) {
+            fclose($this->resource);
+        }
+
+        unset($this->resource);
+    }
+
+    protected function getResource()
+    {
+        if (! is_resource($this->resource)) {
+            $this->resource = $this->createStreamSocket();
+        }
+
+        return $this->resource;
+    }
+
     protected function createStreamSocket()
     {
         if (! $resource = @stream_socket_client($this->address, $errNo, $errStr, $this->timeout, $this->flags)) {
@@ -99,15 +120,6 @@ class Client
         stream_set_timeout($resource, $timeoutSeconds, $timeoutUSeconds);
 
         return $resource;
-    }
-
-    protected function getResource()
-    {
-        if (! is_resource($this->resource)) {
-            $this->resource = $this->createStreamSocket();
-        }
-
-        return $this->resource;
     }
 
     protected function createCommand($commandID, $arguments)

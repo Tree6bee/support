@@ -2,6 +2,8 @@
 
 namespace Tree6bee\Support\Ctx\Cache;
 
+use Exception;
+
 /**
  * redis client
  * 兼容redis协议的客户端，不依赖第三方库
@@ -70,13 +72,17 @@ class Client
     }
 
     /**
-     * {@inheritdoc}
+     * 执行裸命令
+     *
+     * @param string $command 命令
+     * @param bool $withResponse 是否返回响应
+     * @return array|int|resource|string
      */
-    public function executeCommand($command)
+    public function executeCommand($command, $withResponse = true)
     {
         $this->writeRequest($command);
 
-        return $this->readResponse();
+        return $withResponse ? $this->readResponse() : $this->getResource();
     }
 
     protected function createStreamSocket()
@@ -136,8 +142,9 @@ class Client
         }
     }
 
-    function readResponse()
+    protected function readResponse()
     {
+        //从文件指针中读取一行
         $chunk = fgets($this->getResource());
 
         if ($chunk === false || $chunk === '') {

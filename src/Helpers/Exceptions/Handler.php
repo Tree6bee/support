@@ -52,67 +52,33 @@ class Handler
         }
     }
 
-    protected function renderHttpException($e)
-    {
-        if ($this->wantsJson()) {
-            $this->renderHttpExceptionWithJson($e);
-        } else {
-            $this->showPage($e);
-        }
-    }
-
     /**
      * 命令行模式
      */
     protected function renderForConsole($e)
     {
-        echo "\nerror trace:\n" . print_r(array_slice($e->getTrace(), 0, 6), true) . "\n";
+        echo (string) $e;
     }
 
-    /**
-     * http json 模式
-     */
-    protected function renderHttpExceptionWithJson($e)
-    {
-    }
-
-    /**
-     * http web 模式
-     */
-    protected function showPage($e)
+    protected function renderHttpException($e)
     {
         (new Debuger($this->collapseDir, $this->cfVersion))->displayException($e);
     }
 
     /**
-     * 判断是否需要返回json
-     *
-     * @todo 完善后迁移到request中
-     * 判断 header中Content-Type是否包含'/json' 或 '+json'
-     * 判断是否ajax请求 XMLHttpRequest
-     */
-    protected function wantsJson()
-    {
-        //isset($_SERVER['HTTP_X_REQUESTED_WITH']) && 'XMLHttpRequest' == $_SERVER['HTTP_X_REQUESTED_WITH']
-        return false;
-    }
-
-    /**
-     * @todo 完善异常日志，参考laravel
      * 获取记录日志用的异常字符串
      */
     protected function getLogOfException($e)
     {
-        //附加时间
-        $content = '[' . date('Y-m-d H:i:s') . ' ' . date_default_timezone_get() . '] ';
-
         //获取异常信息
-        $content .= '(' . get_class($e) . ':' . $e->getCode() . ') ' .
-                    $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine();
-
-        //附加uri
         $request_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : 'Unkown';
-        $content .= ' [' . $request_uri . ']' .PHP_EOL;
+        return sprintf(
+            "[%s %s] %s\n%s",
+            date('Y-m-d H:i:s'),
+            date_default_timezone_get(),
+            $request_uri,
+            (string) $e
+        );
 
         //根据情况决定是否记录超全局变量，方便排查用户访问错误
         // gethostname();   //服务器主机名，方便排查集群中的具体机器错误
@@ -121,8 +87,6 @@ class Handler
         // var_export($_SERVER, true);
         // var_export($_COOKIE, true);
         // var_export($_REQUEST, true);
-
-        return $content;
     }
 
     /**
@@ -130,7 +94,5 @@ class Handler
      */
     protected function report($e)
     {
-        // $content = $this->getLogOfException($e);
-        // \Tree6bee\Cf\Support\Facades\Log::error($content);
     }
 }

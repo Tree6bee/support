@@ -3,6 +3,7 @@
 namespace Tree6bee\Support\Ctx\Cache;
 
 use Exception;
+use Tree6bee\Support\Ctx\Cache\Pipeline\Pipeline;
 
 /**
  * redis client
@@ -71,6 +72,17 @@ class Client
         );
     }
 
+    public function pipeline($callable)
+    {
+        if (! is_callable($callable)) {
+            throw  new \Exception('The argument must be a callable object.');
+        }
+
+        $pipeline = new Pipeline($this);
+
+        return $pipeline->execute($callable);
+    }
+
     /**
      * 执行裸命令
      *
@@ -122,7 +134,7 @@ class Client
         return $resource;
     }
 
-    protected function createCommand($commandID, $arguments)
+    public function createCommand($commandID, $arguments)
     {
         $reqLen = count($arguments) + 1;
         $cmdLen = strlen($commandID);
@@ -137,7 +149,7 @@ class Client
         return $buffer;
     }
 
-    protected function writeRequest($buffer)
+    public function writeRequest($buffer)
     {
         while (($length = strlen($buffer)) > 0) {
             $written = @fwrite($this->getResource(), $buffer);
@@ -154,7 +166,7 @@ class Client
         }
     }
 
-    protected function readResponse()
+    public function readResponse()
     {
         //从文件指针中读取一行
         $chunk = fgets($this->getResource());

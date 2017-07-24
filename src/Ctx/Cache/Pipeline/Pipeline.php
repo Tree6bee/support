@@ -1,0 +1,106 @@
+<?php
+
+namespace Tree6bee\Support\Ctx\Cache\Pipeline;
+
+use Tree6bee\Support\Ctx\Cache\Client;
+
+class Pipeline
+{
+    private $client;
+    private $pipeline;
+
+    private $responses = array();
+    private $running = false;
+
+    public function __construct(Client $client)
+    {
+        $this->client = $client;
+        $this->pipeline = new \SplQueue();
+    }
+
+    /**
+     * Queues a command into the pipeline buffer.
+     *
+     * @param string $method    Command ID.
+     * @param array  $arguments Arguments for the command.
+     *
+     * @return $this
+     */
+    public function __call($method, $arguments)
+    {
+        $command = $this->client->createCommand($method, $arguments);
+        $this->recordCommand($command);
+
+        return $this;
+    }
+
+    /**
+     * Queues a command instance into the pipeline buffer.
+     */
+    protected function recordCommand($command)
+    {
+        $this->pipeline->enqueue($command);
+    }
+
+    public function execute($callable = null)
+    {
+        $exception = null;
+
+        try {
+            if ($callable) {
+                call_user_func($callable, $this);
+            }
+
+            $this->flushPipeline();
+        } catch (\Exception $exception) {
+            // NOOP
+        }
+
+        if ($exception) {
+            throw $exception;
+        }
+
+        return $this->responses;
+    }
+
+    /**
+     * Flushes the buffer holding all of the commands queued so far.
+     *
+     * @return $this
+     */
+    protected function flushPipeline()
+    {
+        if (! $this->pipeline->isEmpty()) {
+            $responses = $this->executePipeline($this->client, $this->pipeline);
+            $this->responses = array_merge($this->responses, $responses);
+        } else {
+             $this->pipeline = new \SplQueue();
+        }
+
+        return $this;
+    }
+
+    /**
+     * Implements the logic to flush the queued commands and read the responses
+     * from the current connection.
+     *
+     * @return array
+     */
+    protected function executePipeline(Client $connection, \SplQueue $commands)
+    {
+        foreach ($commands as $command) {
+            $connection->writeRequest($command);
+        }
+
+        $responses = array();
+
+        while (! $commands->isEmpty()) {
+            $commands->dequeue();
+            $response = $connection->readResponse();
+
+            $responses[] = $response;
+        }
+
+        return $responses;
+    }
+}

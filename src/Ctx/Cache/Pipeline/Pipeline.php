@@ -10,12 +10,32 @@ class Pipeline
     private $pipeline;
 
     private $responses = array();
-    private $running = false;
 
     public function __construct(Client $client)
     {
         $this->client = $client;
         $this->pipeline = new \SplQueue();
+    }
+
+    public function execute($callable = null)
+    {
+        $exception = null;
+
+        try {
+            if ($callable) {
+                call_user_func($callable, $this);
+            }
+
+            $this->flushPipeline();
+        } catch (\Exception $exception) {
+            // NOOP
+        }
+
+        if ($exception) {
+            throw $exception;
+        }
+
+        return $this->responses;
     }
 
     /**
@@ -42,27 +62,6 @@ class Pipeline
         $this->pipeline->enqueue($command);
     }
 
-    public function execute($callable = null)
-    {
-        $exception = null;
-
-        try {
-            if ($callable) {
-                call_user_func($callable, $this);
-            }
-
-            $this->flushPipeline();
-        } catch (\Exception $exception) {
-            // NOOP
-        }
-
-        if ($exception) {
-            throw $exception;
-        }
-
-        return $this->responses;
-    }
-
     /**
      * Flushes the buffer holding all of the commands queued so far.
      *
@@ -70,11 +69,11 @@ class Pipeline
      */
     protected function flushPipeline()
     {
-        if (! $this->pipeline->isEmpty()) {
+        if ($this->pipeline->isEmpty()) {
+            $this->pipeline = new \SplQueue();
+        } else {
             $responses = $this->executePipeline($this->client, $this->pipeline);
             $this->responses = array_merge($this->responses, $responses);
-        } else {
-             $this->pipeline = new \SplQueue();
         }
 
         return $this;

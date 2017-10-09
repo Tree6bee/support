@@ -2,6 +2,7 @@
 
 namespace Tree6bee\Support\Helpers\Exceptions;
 
+use Tree6bee\Support\Helpers\Arr;
 use Tree6bee\Support\Helpers\Exceptions\Reporter\Debuger;
 
 class Handler
@@ -71,9 +72,9 @@ class Handler
     protected function getLogOfException($e)
     {
         //获取异常信息
-        $request_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : 'Unkown';
+        $request_uri = (php_sapi_name() == 'cli') ? Arr::get($GLOBALS['argv'], 1, '/') : $_SERVER['REQUEST_URI'];
         return sprintf(
-            "[%s %s] %s\n%s",
+            "[%s %s] %s\n%s\n",
             date('Y-m-d H:i:s'),
             date_default_timezone_get(),
             $request_uri,

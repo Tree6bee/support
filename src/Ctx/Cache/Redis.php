@@ -22,13 +22,7 @@ class Redis
      */
     public function __construct($host, $port = 6379, $timeout = 3)
     {
-        $this->redis = new RedisBase();
-//        try {
-            //@todo 增加重连机制
-            $this->redis->pconnect($host, $port, $timeout);
-//        } catch (RedisException $e) {
-//            throw new Exception('Redis连接失败:' . $e->getMessage());
-//        }
+        $this->redis = new Client(sprintf('tcp://%s:%s', $host, $port), $timeout);
     }
 
     /**

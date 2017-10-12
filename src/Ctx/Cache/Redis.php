@@ -23,12 +23,12 @@ class Redis
     public function __construct($host, $port = 6379, $timeout = 3)
     {
         $this->redis = new RedisBase();
-        try {
+//        try {
             //@todo 增加重连机制
             $this->redis->pconnect($host, $port, $timeout);
-        } catch (RedisException $e) {
-            throw new Exception('Redis连接失败:' . $e->getMessage());
-        }
+//        } catch (RedisException $e) {
+//            throw new Exception('Redis连接失败:' . $e->getMessage());
+//        }
     }
 
     /**
@@ -36,12 +36,12 @@ class Redis
      */
     public function __call($method, $args)
     {
-        try {
+//        try {
             return call_user_func_array(array($this->redis, $method), $args);
-        } catch (RedisException $e) {
+//        } catch (RedisException $e) {
             //@todo 记录日志等
-            throw new Exception('Redis错误:' . $e->getMessage());
-        }
+//            throw new Exception('Redis错误:' . $e->getMessage());
+//        }
     }
 
     //---以下为一些非正常方法--

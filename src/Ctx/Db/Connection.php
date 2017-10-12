@@ -152,7 +152,7 @@ class Connection
      * @return int
      * @throws Exception
      */
-    public function update($table, array $values, array $where, $etc = '')
+    public function update($table, array $where, array $values, $etc = '')
     {
         // $sql = 'UPDATE tb SET c1 = ?, c2 = ? WHERE c3 = ?'
         if (empty($where)) {

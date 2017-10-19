@@ -104,6 +104,6 @@ class HandleExceptions
      */
     public function handleException($e)
     {
-        call_user_func($this->callback, $e);
+        ($this->callback)($e);
     }
 }

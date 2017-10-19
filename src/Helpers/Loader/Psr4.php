@@ -38,3 +38,13 @@ class Psr4
         return false;
     }
 }
+
+/**
+ * Prevents access to $this/self from included files.
+ *
+ * autoload会用到
+ */
+function includeFile($file)
+{
+    return include $file;
+}

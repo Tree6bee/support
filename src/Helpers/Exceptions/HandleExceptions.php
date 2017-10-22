@@ -37,7 +37,7 @@ class HandleExceptions
     /**
      * 异常接管注册
      */
-    protected function handle()
+    public function handle()
     {
         error_reporting(-1);
 

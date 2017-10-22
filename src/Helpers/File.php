@@ -33,7 +33,7 @@ class File
      * @return bool
      * @throws Exception
      */
-    public static function write($file, $content)
+    public static function append($file, $content)
     {
         if (empty($file)) {
             throw new Exception('file参数不能为空');

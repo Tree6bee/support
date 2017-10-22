@@ -30,10 +30,11 @@ class File
      *
      * @param $file
      * @param $content
+     * @param int $flags
      * @return bool
      * @throws Exception
      */
-    public static function append($file, $content)
+    public static function write($file, $content, $flags = FILE_APPEND)
     {
         if (empty($file)) {
             throw new Exception('file参数不能为空');
@@ -41,7 +42,7 @@ class File
 
         if (is_file($file)) {
             if (is_writeable($file)) {
-                file_put_contents($file, $content, FILE_APPEND);
+                file_put_contents($file, $content, $flags);
                 return true;
             }
 
@@ -52,7 +53,7 @@ class File
                 throw new Exception($dir . ' 目录生成失败');
             }
 
-            file_put_contents($file, $content, FILE_APPEND);
+            file_put_contents($file, $content, $flags);
             return true;
         }
     }

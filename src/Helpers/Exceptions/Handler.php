@@ -3,9 +3,10 @@
 namespace Tree6bee\Support\Helpers\Exceptions;
 
 use Tree6bee\Support\Helpers\Arr;
+use Tree6bee\Support\Helpers\Exceptions\Contracts\ExceptionsHandler;
 use Tree6bee\Support\Helpers\Exceptions\Reporter\Debuger;
 
-class Handler
+class Handler implements ExceptionsHandler
 {
     protected $collapseDir;
 

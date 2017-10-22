@@ -4,6 +4,7 @@ namespace Tree6bee\Support\Helpers\Exceptions;
 
 use ErrorException;
 use Closure;
+use Tree6bee\Support\Helpers\Exceptions\Contracts\ExceptionsHandler;
 
 /**
  * 框架系统异常错误处理接管类
@@ -14,10 +15,8 @@ use Closure;
  * @version   0.0.1
  *
  * @example
- * $handler = new Handler('CtxFramework/1.1');
- * new HandleExceptions(true, function ($e) use ($handler) {
- *      call_user_func([$handler, 'handle'], $e);
- * });
+ * $handler = new Handler('CtxFramework/1.0');
+ * (new HandleExceptions($handler, false))->handle();
  */
 class HandleExceptions
 {
@@ -26,17 +25,18 @@ class HandleExceptions
      */
     protected $testing;
 
-    protected $callback;
+    protected $handler;
 
-    public function __construct(Closure $callback, $testing = false)
+    public function __construct(ExceptionsHandler $handler, $testing = false)
     {
         //初始化
         $this->testing = $testing;
-        $this->callback = $callback;
-        //接管
-        $this->handle();
+        $this->handler = $handler;
     }
 
+    /**
+     * 异常接管注册
+     */
     protected function handle()
     {
         error_reporting(-1);
@@ -101,9 +101,11 @@ class HandleExceptions
 
     /**
      * 异常处理接管
+     *
+     * @param $exception
      */
-    public function handleException($e)
+    public function handleException($exception)
     {
-        ($this->callback)($e);
+        $this->handler->handle($exception);
     }
 }

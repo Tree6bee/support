@@ -3,7 +3,6 @@
 namespace Tree6bee\Support\Ctx\Config;
 
 use Tree6bee\Support\Ctx\Config\Repository as ConfigRepository;
-use Exception;
 
 /**
  * 框架配置辅助类
@@ -81,7 +80,7 @@ class Config
         }
         $file = $options['file'] . '.php';
         // if (! file_exists($file)) {  //采用了require
-        //     throw new Exception($file . ' :config file do not exist.');
+        //     throw new \Exception($file . ' :config file do not exist.');
         // }
         $config = require $file;
         $this->repository->set($options['file'], $config);

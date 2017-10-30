@@ -2,7 +2,7 @@
 
 namespace Tree6bee\Support\Ctx\Cache\Pipeline;
 
-use Tree6bee\Support\Ctx\Cache\Client;
+use Tree6bee\Support\Ctx\Cache\Redis;
 
 class Pipeline
 {
@@ -11,7 +11,7 @@ class Pipeline
 
     private $responses = array();
 
-    public function __construct(Client $client)
+    public function __construct(Redis $client)
     {
         $this->client = $client;
         $this->pipeline = new \SplQueue();
@@ -83,9 +83,12 @@ class Pipeline
      * Implements the logic to flush the queued commands and read the responses
      * from the current connection.
      *
+     * @param Redis $connection
+     * @param \SplQueue $commands
+     *
      * @return array
      */
-    protected function executePipeline(Client $connection, \SplQueue $commands)
+    protected function executePipeline(Redis $connection, \SplQueue $commands)
     {
         foreach ($commands as $command) {
             $connection->writeRequest($command);

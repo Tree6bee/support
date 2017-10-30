@@ -1,12 +1,12 @@
 <?php
 
-namespace Tree6bee\Support\Ctx\Loader;
+namespace Tree6bee\Support\Helpers\Loader;
 
 /**
  * 框架加载类
- *
+ * @deprecated 不建议采用，多依赖composer本身的类加载
  * @example 
- *      new \Tree6bee\Support\Ctx\Loader\Psr4(array('Ctx\\' => __DIR__ . '/../Ctx'));
+ *      new \Tree6bee\Support\Helpers\Loader\Psr4(array('Ctx\\' => __DIR__ . '/../Ctx'));
  */
 class Psr4
 {
@@ -37,4 +37,14 @@ class Psr4
         }
         return false;
     }
+}
+
+/**
+ * Prevents access to $this/self from included files.
+ *
+ * autoload会用到
+ */
+function includeFile($file)
+{
+    return include $file;
 }

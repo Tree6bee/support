@@ -5,7 +5,7 @@ namespace Tree6bee\Support\Helpers\Exceptions\Reporter;
 /**
  * 异常展示
  */
-class Debuger
+class Debugger
 {
     protected $collapseDir;
 

@@ -4,7 +4,7 @@ namespace Tree6bee\Support\Helpers\Exceptions;
 
 use Tree6bee\Support\Helpers\Arr;
 use Tree6bee\Support\Helpers\Exceptions\Contracts\ExceptionsHandler;
-use Tree6bee\Support\Helpers\Exceptions\Reporter\Debuger;
+use Tree6bee\Support\Helpers\Exceptions\Reporter\Debugger;
 
 class Handler implements ExceptionsHandler
 {
@@ -64,7 +64,7 @@ class Handler implements ExceptionsHandler
 
     protected function renderHttpException($e)
     {
-        (new Debuger($this->collapseDir, $this->cfVersion))->displayException($e);
+        (new Debugger($this->collapseDir, $this->cfVersion))->displayException($e);
     }
 
     /**

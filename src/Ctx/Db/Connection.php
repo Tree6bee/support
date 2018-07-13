@@ -26,6 +26,24 @@ class Connection
      */
     protected $timeout = 3;
 
+    protected $debug = false;
+
+    protected $lastSql = [];
+
+    public function getLastSql()
+    {
+        return $this->lastSql;
+    }
+
+    public function debugSql(Closure $callback)
+    {
+        $this->debug = true;
+        $result = $callback($this);
+        $this->debug = false;
+
+        return $this->lastSql;
+    }
+
     /**
      * Db constructor.
      * @param string $dsn dsn
@@ -86,9 +104,16 @@ class Connection
     {
         $stmt = $this->pdo->prepare($sql);
         $this->bindValues($stmt, $bindings);
-        $stmt->execute();
 
-        return $statement ? $stmt : $stmt->fetchAll();
+        $this->lastSql = [ //log
+            $sql,
+            $bindings
+        ];
+
+        if (! $this->debug) {
+            $stmt->execute();
+            return $statement ? $stmt : $stmt->fetchAll();
+        }
     }
 
     /**
@@ -125,9 +150,17 @@ class Connection
         $bindings = $ret['bindings'];
         $stmt = $this->pdo->prepare($sql);
         $this->bindValues($stmt, $bindings);
-        $stmt->execute();
 
-        return $insertId ? $this->getLastInsertId() : $stmt->rowCount();  //受影响的行数:1
+        $this->lastSql = [ //log
+            $sql,
+            $bindings
+        ];
+
+        if (! $this->debug) {
+            $stmt->execute();
+
+            return $insertId ? $this->getLastInsertId() : $stmt->rowCount();  //受影响的行数:1
+        }
     }
 
     /**
@@ -166,9 +199,16 @@ class Connection
         $bindings = array_merge(array_values($values), array_values($where));
         $stmt = $this->pdo->prepare($sql);
         $this->bindValues($stmt, $bindings);
-        $stmt->execute();
-        // $this->pdo = null;
-        return $stmt->rowCount();  //其实这里没有连接mysql
+
+        $this->lastSql = [ //log
+            $sql,
+            $bindings
+        ];
+
+        if (! $this->debug) {
+            $stmt->execute();
+            return $stmt->rowCount();  //其实这里没有连接mysql
+        }
     }
 
     /**
@@ -195,9 +235,16 @@ class Connection
         $bindings = array_values($where);
         $stmt = $this->pdo->prepare($sql);
         $this->bindValues($stmt, $bindings);
-        $stmt->execute();
-        // $this->pdo = null;
-        return $stmt->rowCount();  //其实这里没有连接mysql
+
+        $this->lastSql = [ //log
+            $sql,
+            $bindings
+        ];
+
+        if (! $this->debug) {
+            $stmt->execute();
+            return $stmt->rowCount();  //其实这里没有连接mysql
+        }
     }
 
     /**

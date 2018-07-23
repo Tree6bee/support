@@ -18,6 +18,8 @@ class Connection
      * exec() | query() | quote() | fetchAll() | fetchColumn() | lastInsertId()
      * beginTransaction() | rollBack() | commit() |
      * errorInfo() | getAttribute(constant('PDO::ATTR_' . $value()
+     *
+     * @var PDO
      */
     protected $pdo;
 
@@ -26,23 +28,19 @@ class Connection
      */
     protected $timeout = 3;
 
-    protected $debug = false;
+    /**
+     * 是否空转
+     *
+     * @var bool
+     */
+    protected $pretending = false;
 
-    protected $lastSql = [];
-
-    public function getLastSql()
-    {
-        return $this->lastSql;
-    }
-
-    public function debugSql(Closure $callback)
-    {
-        $this->debug = true;
-        $result = $callback($this);
-        $this->debug = false;
-
-        return $this->lastSql;
-    }
+    /**
+     * All of the queries run against the connection.
+     *
+     * @var array
+     */
+    protected $queryLog = [];
 
     /**
      * Db constructor.
@@ -65,15 +63,6 @@ class Connection
     }
 
     /**
-     * 析构函数
-     * 关闭数据库连接
-     */
-    public function __destruct()
-    {
-        $this->pdo = null;
-    }
-
-    /**
      * @return array
      */
     protected function getDefaultOptions()
@@ -92,159 +81,28 @@ class Connection
     }
 
     /**
-     * 查询
-     * $ret = $mdb->select('select * from tree6bee where id = ?', array(22));
+     * Execute the given callback in "dry run"(空转) mode.
      *
-     * @param string $sql 查询的 sql 如 select * from tree6bee where id = ?
-     * @param array $bindings 绑定的参数 如 array(22)
-     * @param bool $statement 是否返回 PDOStatement，不返回则直接返回查询的结果数组
-     * @return array|\PDOStatement
+     * @param  \Closure  $callback
+     * @return array
      */
-    public function select($sql, array $bindings = array(), $statement = false)
+    public function pretend(Closure $callback)
     {
-        $stmt = $this->pdo->prepare($sql);
-        $this->bindValues($stmt, $bindings);
+        $this->pretending = true;
 
-        $this->lastSql = [ //log
-            $sql,
-            $bindings
-        ];
+        // Basically to make the database connection "pretend", we will just return
+        // the default values for all the query methods, then we will return an
+        // array of queries that were "executed" within the Closure callback.
+        $callback($this);
 
-        if (! $this->debug) {
-            $stmt->execute();
-            return $statement ? $stmt : $stmt->fetchAll();
-        }
+        $this->pretending = false;
+
+        return $this->queryLog;
     }
 
-    /**
-     * 插入数据
-     * @example
-     * echo $mdb->insert('tree6bee', array(
-     *     array(
-     *         'int'   => 69,
-     *         'var'   => 'xxxooo',
-     *         'boolean'   => true,
-     *     ),
-     * ));
-     *
-     * @param string $table 表名
-     * @param array $values 插入的数据
-     * @param bool $insertId 是否返回 insert id，返回会增加一次 mysql 请求
-     *                       false的时候返回影响的条数
-     * @return int|string
-     */
-    public function insert($table, array $values, $insertId = false)
+    public function getLastQueryLog()
     {
-        // $sql = 'INSERT INTO tb (c1, c2) VALUES (?, ?), (?, ?)';
-        if (! is_array(reset($values))) {
-            $values = array($values);
-        }
-        //insert ignore into 的方式需要自己手动封装
-        $sql = 'INSERT INTO ' . $table;
-        $sql .= $this->getColumns(array_keys(reset($values)));  //columns
-        $sql .= ' VALUES ';
-
-        $ret = $this->getPlaceholdersAndBindings($values);
-
-        $sql .= $this->getInsertPlaceholders($ret['placeholders']);  //columns
-        $bindings = $ret['bindings'];
-        $stmt = $this->pdo->prepare($sql);
-        $this->bindValues($stmt, $bindings);
-
-        $this->lastSql = [ //log
-            $sql,
-            $bindings
-        ];
-
-        if (! $this->debug) {
-            $stmt->execute();
-
-            return $insertId ? $this->getLastInsertId() : $stmt->rowCount();  //受影响的行数:1
-        }
-    }
-
-    /**
-     *
-     * 更新
-     * echo $mdb->update(
-     *     'tree6bee',
-     *     array( //data
-     *         'var'   => 'ooo',
-     *         'boolean'   => 1,
-     *     ),
-     *     array( //where
-     *         'id'    => 1,
-     *         'int'   => 111,
-     *     ), 'limit 1'
-     * );
-     *
-     * @param $table
-     * @param array $values
-     * @param array $where
-     * @param string $etc
-     * @return int
-     * @throws Exception
-     */
-    public function update($table, array $where, array $values, $etc = '')
-    {
-        // $sql = 'UPDATE tb SET c1 = ?, c2 = ? WHERE c3 = ?'
-        if (empty($where)) {
-            throw new Exception('必须指定数据库更新的条件');
-        }
-        $sql = 'UPDATE ' . $table . ' SET ';
-        $sql .= $this->getPlaceholders($values);
-        $sql .= ' WHERE ';
-        $sql .= $this->where($where);
-        $sql .= ' ' . $etc;
-        $bindings = array_merge(array_values($values), array_values($where));
-        $stmt = $this->pdo->prepare($sql);
-        $this->bindValues($stmt, $bindings);
-
-        $this->lastSql = [ //log
-            $sql,
-            $bindings
-        ];
-
-        if (! $this->debug) {
-            $stmt->execute();
-            return $stmt->rowCount();  //其实这里没有连接mysql
-        }
-    }
-
-    /**
-     * 删除数据
-     * echo $mdb->del('tree6bee', array(
-     *     'int'   => 111,
-     * ));
-     *
-     * @param $table
-     * @param array $where
-     * @param string $etc
-     * @return int
-     * @throws Exception
-     */
-    public function delete($table, array $where, $etc = '')
-    {
-        // $sql = 'DELETE FROM tb WHERE c1 = 'xyz'';
-        if (empty($where)) {
-            throw new Exception('必须指定数据库删除的条件');
-        }
-        $sql = 'DELETE FROM ' . $table . ' WHERE ';
-        $sql .= $this->where($where);
-        $sql .= ' ' . $etc;
-        $bindings = array_values($where);
-        $stmt = $this->pdo->prepare($sql);
-        $this->bindValues($stmt, $bindings);
-
-        $this->lastSql = [ //log
-            $sql,
-            $bindings
-        ];
-
-        if (! $this->debug) {
-            $stmt->execute();
-            return $stmt->rowCount();  //其实这里没有连接mysql
-        }
+        return $this->queryLog;
     }
 
     /**
@@ -263,41 +121,99 @@ class Connection
      */
     public function transaction(Closure $callback)
     {
-            $this->pdo->beginTransaction();
+        $this->pdo->beginTransaction();
 
-            // We'll simply execute the given callback within a try / catch block
-            // and if we catch any exception we can rollback the transaction
-            // so that none of the changes are persisted to the database.
-            try {
-                $result = $callback($this);
+        // We'll simply execute the given callback within a try / catch block
+        // and if we catch any exception we can rollback the transaction
+        // so that none of the changes are persisted to the database.
+        try {
+            $result = $callback($this);
 
-                $this->pdo->commit();
+            $this->pdo->commit();
+        }
+
+        // If we catch an exception, we will roll back so nothing gets messed
+        // up in the database. Then we'll re-throw the exception so it can
+        // be handled how the developer sees fit for their applications.
+        catch (Exception $e) {
+            $this->pdo->rollBack();
+
+            throw $e;
+        } catch (Throwable $e) {
+            $this->pdo->rollBack();
+
+            throw $e;
+        }
+
+        return $result;
+    }
+
+    protected function run($query, $bindings, Closure $callback)
+    {
+        $start = microtime(true);
+        $result = $callback($query, $bindings);
+        $time = round((microtime(true) - $start) * 1000, 2);
+        $this->queryLog = compact('query', 'bindings', 'time');
+
+        return $result;
+    }
+
+    public function select($query, $bindings = [])
+    {
+        return $this->run($query, $bindings, function ($query, $bindings) {
+            if ($this->pretending) {
+                return [];
             }
 
-            // If we catch an exception, we will roll back so nothing gets messed
-            // up in the database. Then we'll re-throw the exception so it can
-            // be handled how the developer sees fit for their applications.
-            catch (Exception $e) {
-                $this->pdo->rollBack();
+            $stmt = $this->pdo->prepare($query);
+            $this->bindValues($stmt, $bindings);
 
-                throw $e;
-            } catch (Throwable $e) {
-                $this->pdo->rollBack();
-
-                throw $e;
-            }
-
-            return $result;
+            $stmt->execute();
+            return $stmt->fetchAll();
+        });
     }
 
     /**
-     * 获取最近一次的 insert id
+     * Run an SQL statement and get the number of rows affected.
      *
-     * @return string
+     * @param  string  $query
+     * @param  array   $bindings
+     * @return int
      */
-    public function getLastInsertId()
+    protected function affectingStatement($query, $bindings = [])
     {
-        return $this->pdo->lastInsertId();
+        return $this->run($query, $bindings, function ($query, $bindings) {
+            if ($this->pretending) {
+                return [];
+            }
+
+            $stmt = $this->pdo->prepare($query);
+            $this->bindValues($stmt, $bindings);
+            $stmt->execute();
+            return $stmt->rowCount();  //受影响的行数:1
+        });
+    }
+
+    public function insertGetId($query, $bindings = [], $primaryKey = 'id')
+    {
+        $this->insert($query, $bindings);
+
+        return $this->pdo->lastInsertId($primaryKey);
+    }
+
+    public function insert($query, $bindings = [])
+    {
+        return $this->affectingStatement($query, $bindings);
+    }
+
+    public function update($query, $bindings)
+    {
+        return $this->affectingStatement($query, $bindings);
+    }
+
+    public function delete($query, $bindings)
+    {
+        return $this->affectingStatement($query, $bindings);
     }
 
     /**
@@ -307,7 +223,7 @@ class Connection
      * @param  array  $bindings
      * @return void
      */
-    public function bindValues($statement, $bindings)
+    protected function bindValues($statement, $bindings)
     {
         foreach ($bindings as $key => $value) {
             $statement->bindValue(
@@ -319,59 +235,12 @@ class Connection
         }
     }
 
-    protected function getColumns($columns)
-    {
-        return '( ' . implode(', ', $columns) . ' )';
-    }
-
-    protected function getPlaceholdersAndBindings($values)
-    {
-        $placeholders = array();
-        $bindings = array();
-        foreach ($values as $row => $rowValue) {
-            $placeholder = array();
-            foreach ($rowValue as $index => $val) {
-                $bindings[] = $val;
-                $placeholder[] = '?';
-            }
-            $placeholders[] = implode(', ', $placeholder);
-        }
-        return array(
-            'placeholders'  => $placeholders,
-            'bindings'      => $bindings,
-        );
-    }
-
-    protected function getInsertPlaceholders($row)
-    {
-        // (?, ?),
-        return ' (' . implode('), (', $row) . ') ';
-    }
-
-    protected function getPlaceholders($values)
-    {
-        $placeholders = array();
-        foreach ($values as $column => $binding) {
-            $placeholders[] = '' . $column . ' = ?';
-        }
-        return implode(', ', $placeholders);
-    }
-
     /**
-     * 获取where条件占位
-     * array('id'   => 1, 'c1'  => 'abc')
-     *      => id = ? and c1 = ?
-     *
-     * @param array $values
-     * @return string
+     * @deprecated 不建议直接使用
      */
-    protected function where(array $values = array())
+    public function getPdo()
     {
-        $placeholders = array();
-        foreach ($values as $column => $binding) {
-            $placeholders[] = $column . ' = ?';
-        }
-        return implode(' AND ', $placeholders);
+        return $this->pdo;
     }
 
     public function info()
@@ -387,22 +256,5 @@ class Connection
             $output[$key] = $this->pdo->getAttribute(constant('PDO::ATTR_' . $value));
         }
         return $output;
-    }
-
-    /**
-     * @deprecated 不建议直接使用
-     */
-    public function getPdo()
-    {
-        return $this->pdo;
-    }
-
-    /**
-     * 调用方法
-     */
-    public function __call($method, $args)
-    {
-        //@todo 记录日志
-        return call_user_func_array(array($this->pdo, $method), $args);
     }
 }

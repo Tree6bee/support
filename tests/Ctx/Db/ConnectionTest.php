@@ -3,6 +3,7 @@
 namespace Tests\Tree6bee\Support;
 
 use Tree6bee\Support\Ctx\Db\Connection;
+use Tree6bee\Support\Ctx\Db\Pgsql;
 
 class ConnectionTest extends \PHPUnit_Framework_TestCase
 {
@@ -13,69 +14,30 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
         parent::__construct($name, $data, $dataName);
 
         //初始化用于测试的config对象
-        $this->db = new Connection('pgsql:host=127.0.0.1;port=5432;dbname=dbname', 'develop', '');
+        $this->db = new Pgsql('pgsql:host=192.168.3.165;port=5432;dbname=postgres', 'postgres', 'xxoo');
     }
 
     public function testQuery()
     {
-        //事务
-        $id = rand(100, 1000);
-        return ;    //屏蔽测试
+//        $data = $this->db->pretend(function () {
+//            $this->db->select('select * from users', []);
+//        });
 
-        try {
-            $this->db->transaction(function($db) use ($id) { 
+//        $data = $this->db->pretend(function () {
+//            $this->db->insert('insert into users (name, password) values (?, ?), (?, ?)', ["tom", "a323", "李四", 'acb']);
+//        });
 
-                //写入
-                var_dump( $db->insert('users', array(
-                    array(
-                        'id'     => $id,
-                        'name'   => '张三',
-                    ),
-                ), false));
-                print_r( $db->select('select * from users where id = ?', array($id)) );
+//        $data = $this->db->insertGetId('insert into xxx (xx, id) values (?, ?)', ["tom", "a323"], "tt");
+//
+//        echo "\n --- ";
+//        print_r($data);
+//        echo "\n --- ";
+//
+//        exit;
+//        $this->db->query()
+//            ->table('users')
+//            ->get();
 
-                //更新
-                var_dump($db->update(
-                    'users',
-                    array(
-                        'name'  => '李四',
-                    ), array(
-                        'id'    => $id,
-                    )
-                ));
-                print_r( $db->select('select * from users where id = ?', array($id)) );
-
-                //删除
-                var_dump($db->delete('users', array(
-                    'id'    => $id,
-                )));
-                throw new \Exception('transaction test');
-            });
-        } catch (\Exception $e) {
-            print_r( $this->db->select('select * from users where id = ?', array($id)) );
-            echo $e->getMessage();
-        }
-    }
-
-    /**
-     * 测试pgsql jsonb字段的写入
-     */
-    public function testJsonb()
-    {
-        $id = rand(100, 1000);
-        return ;    //屏蔽测试
-
-        $this->db->transaction(function($db) use ($id) { 
-            //写入
-            var_dump($this->db->insert('users', array(
-                array(
-                    'id'    => $id,
-                    'name'  => '张三',
-                    'data'  => json_encode(array('a', 'b', 'c')),
-                ),
-            )));
-            print_r( $this->db->select('select * from users where id = ?', array($id)) );
-            throw new \Exception('transaction test');
-        });
+        $this->assertNull(null);
     }
 }

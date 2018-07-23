@@ -7,4 +7,8 @@ namespace Tree6bee\Support\Ctx\Db;
  */
 class Pgsql extends Connection
 {
+    public function insertGetId($query, $bindings = [], $primaryKey = 'id')
+    {
+        return $this->select($query . " returning " . $primaryKey, $bindings)[0][$primaryKey];
+    }
 }

@@ -6,6 +6,8 @@ use PDO;
 use Exception;
 use Throwable;
 use Closure;
+use Tree6bee\Support\Ctx\Db\Query\Builder;
+use Tree6bee\Support\Ctx\Db\Query\Grammars\Grammar;
 
 /**
  * 框架MySql数据库辅助类
@@ -184,7 +186,7 @@ class Connection
     {
         return $this->run($query, $bindings, function ($query, $bindings) {
             if ($this->pretending) {
-                return [];
+                return 0;
             }
 
             $stmt = $this->pdo->prepare($query);
@@ -194,6 +196,15 @@ class Connection
         });
     }
 
+    /**
+     * 插入数据获取自增id (只支持单条数据,如果为多条会出现问题)
+     *
+     * @param $query
+     * @param array $bindings
+     * @param string $primaryKey
+     *
+     * @return string
+     */
     public function insertGetId($query, $bindings = [], $primaryKey = 'id')
     {
         $this->insert($query, $bindings);
@@ -241,6 +252,16 @@ class Connection
     public function getPdo()
     {
         return $this->pdo;
+    }
+
+    /**
+     * @param $table
+     *
+     * @return Builder
+     */
+    public function table($table)
+    {
+        return (new Builder($this, new Grammar()))->table($table);
     }
 
     public function info()

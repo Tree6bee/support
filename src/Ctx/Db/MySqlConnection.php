@@ -3,12 +3,14 @@
 namespace Tree6bee\Support\Ctx\Db;
 
 use PDO;
+use Tree6bee\Support\Ctx\Db\Query\Builder;
+use Tree6bee\Support\Ctx\Db\Query\Grammars\MySqlGrammar;
 
 /**
  * 框架MySql数据库辅助类
  * 每个实例代表一次数据库连接
  */
-class Mysql extends Connection
+class MySqlConnection extends Connection
 {
     /**
      * Bind values to their parameters in the given statement.
@@ -25,5 +27,15 @@ class Mysql extends Connection
                 is_int($value) || is_float($value) ? PDO::PARAM_INT : PDO::PARAM_STR
             );
         }
+    }
+
+    /**
+     * @param $table
+     *
+     * @return Builder
+     */
+    public function table($table)
+    {
+        return (new Builder($this, new MySqlGrammar()))->table($table);
     }
 }

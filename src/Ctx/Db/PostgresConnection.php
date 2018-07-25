@@ -1,0 +1,36 @@
+<?php
+
+namespace Tree6bee\Support\Ctx\Db;
+
+use Tree6bee\Support\Ctx\Db\Query\Builder;
+use Tree6bee\Support\Ctx\Db\Query\Grammars\PostgresGrammar;
+
+/**
+ * 框架Pgsql数据库辅助类
+ */
+class PostgresConnection extends Connection
+{
+    /**
+     * 插入数据获取自增id (只支持单条数据,如果为多条会出现问题)
+     *
+     * @param $query
+     * @param array $bindings
+     * @param string $primaryKey
+     *
+     * @return string
+     */
+    public function insertGetId($query, $bindings = [], $primaryKey = 'id')
+    {
+        return $this->select($query . " returning " . $primaryKey, $bindings)[0][$primaryKey];
+    }
+
+    /**
+     * @param $table
+     *
+     * @return Builder
+     */
+    public function table($table)
+    {
+        return (new Builder($this, new PostgresGrammar()))->table($table);
+    }
+}

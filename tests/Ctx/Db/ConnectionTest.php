@@ -18,38 +18,77 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
 
     public function testQuery()
     {
-//        $data = $this->db->pretend(function () {
-//            $this->db->select('select * from users', []);
-//        });
+        try {
+            /** table structure:  id, name, password */
+            $this->db->transaction(function () {
+                //insert
+                $insertCount = $this->db->insert('insert into users (name, password) values (?, ?), (?, ?)', [
+                    'name1',
+                    'password1',
+                    'name2',
+                    'password2',
+                ]);
+                $this->assertEquals(2, $insertCount);
 
-//        $data = $this->db->pretend(function () {
-//            $this->db->insert('insert into users (name, password) values (?, ?), (?, ?)', ["tom", "a323", "李四", 'acb']);
-//        });
+                //insert get id
+                $insertId = $this->db->insertGetId('insert into users (name, password) values (?, ?)', ['name3', 'password3',], 'id');
 
-//        $data = $this->db->insertGetId("insert into users(name, password) values('a', 'a'),('b', 'b'),('c', 'c'),('d', 'd')", [], 'id');
-//        print_r($data);
+                //select
+                $data = $this->db->select('select * from users where id = :id', [
+                    ':id' => $insertId,
+                ]);
+                $this->assertEquals(1, count($data));
+                $this->assertEquals('name3', $data[0]['name']);
 
-        $data = [
-            [
-                'name'      => 'xx',
-                'password'  => 'yy',
-            ],
-            [
-                'name'      => 'aa',
-                'password'  => 'bb',
-            ],
-            [
-                'name'      => 'tt',
-                'password'  => 'ss',
-            ],
-        ];
+                //update
+                $updateCount = $this->db->update('update users set name = :name where password = :password', [
+                    ':name'     => 'name2',
+                    ':password' => 'password1',
+                ]);
+                $this->assertEquals(1, $updateCount);
 
-        $this->db->transaction(function () use ($data) {
-            $ret = $this->db->table('users')->insert($data);
-            print_r($this->db->getLastQueryLog());
-            print_r($ret);
-            throw new \Exception('test');
-        });
+                $data = $this->db->select('select * from users where name = :name', [
+                    ':name' => 'name2',
+                ]);
+                $this->assertEquals(2, count($data));
+
+                //delete
+                $updateCount = $this->db->delete('delete from users where password = :password', [
+                    ':password' => 'password1',
+                ]);
+                $this->assertEquals(1, $updateCount);
+
+                $data = $this->db->select('select * from users where name = :name', [
+                    ':name' => 'name2',
+                ]);
+                $this->assertEquals(1, count($data));
+                $this->assertEquals('password2', $data[0]['password']);
+
+
+                //query insert
+                $insertCount = $this->db->table('users')->insert([
+                    [
+                        'name'      => 'xx',
+                        'password'  => 'yy',
+                    ],
+                    [
+                        'name'      => 'aa',
+                        'password'  => 'bb',
+                    ],
+                    [
+                        'name'      => 'tt',
+                        'password'  => 'ss',
+                    ],
+                ]);
+
+                $this->assertEquals(3, $insertCount);
+
+                throw new \Exception('db operate test done.');
+            });
+        } catch (\Throwable $e) {
+            echo "\ndb test: " . $e->getMessage() . "\n";
+            throw $e;
+        }
 
         $this->assertNull(null);
     }

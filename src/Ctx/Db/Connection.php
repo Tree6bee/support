@@ -199,6 +199,8 @@ class Connection
     /**
      * 插入数据获取自增id (只支持单条数据,如果为多条会出现问题)
      *
+     * @deprecated 不建议直接使用, 所有 insert 操作建议走 query
+     *
      * @param $query
      * @param array $bindings
      * @param string $primaryKey
@@ -212,6 +214,14 @@ class Connection
         return $this->pdo->lastInsertId($primaryKey);
     }
 
+    /**
+     * @deprecated 不建议直接使用, 所有 insert 操作建议走 query
+     *
+     * @param $query
+     * @param array $bindings
+     *
+     * @return int
+     */
     public function insert($query, $bindings = [])
     {
         return $this->affectingStatement($query, $bindings);

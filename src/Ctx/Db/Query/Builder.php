@@ -54,4 +54,11 @@ class Builder
 
         return $this->conn->insert($query, $bindings);
     }
+
+    public function insertGetId(array $values, $primaryKey = 'id')
+    {
+        list($query, $bindings) = $this->grammar->compileInsertGetId($this, $values);
+
+        return $this->conn->insertGetId($query, $bindings, $primaryKey);
+    }
 }

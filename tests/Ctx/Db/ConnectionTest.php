@@ -83,11 +83,25 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
 
                 $this->assertEquals(3, $insertCount);
 
+
+                //query insert get id
+                $insertId = $this->db->table('users')->insertGetId([
+                    'name'      => 'xxx',
+                    'password'  => 'ooo',
+                ]);
+
+                //select
+                $data = $this->db->select('select * from users where id = :id', [
+                    ':id' => $insertId,
+                ]);
+                $this->assertEquals(1, count($data));
+                $this->assertEquals('xxx', $data[0]['name']);
+
                 throw new \Exception('db operate test done.');
             });
         } catch (\Throwable $e) {
-            echo "\ndb test: " . $e->getMessage() . "\n";
-            throw $e;
+//            echo "\ndb test: " . $e->getMessage() . "\n";
+//            throw $e;
         }
 
         $this->assertNull(null);

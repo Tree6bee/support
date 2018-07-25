@@ -29,6 +29,26 @@ class Grammar
         ];
     }
 
+    public function compileInsertGetId(Builder $query, $values)
+    {
+        $columnArr = array_keys($values);
+
+        $bindings = array_values($values);
+
+        $placeholders = $this->getInsertPlaceholders(count($columnArr), 1);
+
+        return [
+            sprintf(
+                'insert into %s (%s) values %s',
+                $this->wrap($query->table), //table
+                implode(', ', $this->wrapArray($columnArr)), //columns
+                $placeholders //value placeholders
+            ),
+
+            $bindings,
+        ];
+    }
+
     protected function getInsertPlaceholders($columnCount, $rowCount)
     {
         $rowPlaceholderArr = array_fill(0, $columnCount, '?');

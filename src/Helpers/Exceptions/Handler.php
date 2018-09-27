@@ -16,7 +16,7 @@ class Handler implements ExceptionsHandler
      * @param string $collapseDir 错误显示页面中需要折叠的代码目录
      * @param string $cfVersion 错误显示页面的框架标识
      */
-    public function __construct($collapseDir = '', $cfVersion = 'CtxFramework/1.0')
+    public function __construct($collapseDir = '', $cfVersion = 'TFramework/1.0')
     {
         $this->collapseDir = $collapseDir;
         $this->cfVersion = $cfVersion;

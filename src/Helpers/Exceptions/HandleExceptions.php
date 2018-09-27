@@ -15,7 +15,7 @@ use Tree6bee\Support\Helpers\Exceptions\Contracts\ExceptionsHandler;
  * @version   0.0.1
  *
  * @example
- * $handler = new Handler('CtxFramework/1.0');
+ * $handler = new Handler('TFramework/1.0');
  * (new HandleExceptions($handler, false))->handle();
  */
 class HandleExceptions
